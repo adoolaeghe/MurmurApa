@@ -6,24 +6,33 @@ let murSchema = mongoose.Schema({
   },
   songName: {
     type: String,
+    required: true
   },
   artistName: {
     type: String,
+    required: true
   },
   photoUrl: {
     type: String,
+    required: true
   },
   songUrl: {
     type: String,
+    required: true
   },
   songSchema: {
-    type: Object
+    type: Schema.Types.ObjectId, ref: 'songSchema'
   }
 })
 
 let Mur = module.exports = mongoose.model('Mur', murSchema);
 
-//Get Murs
-module.exports.getMurs = (callback, limit) => {
-   console.log('hello')
+//Get All Murs
+module.exports.getAllMurs = (callback, limit) => {
+  Mur.find(callback);
+}
+
+//add a Murs
+module.exports.addMur = (mur, callback) => {
+  Mur.create(mur, callback);
 }
