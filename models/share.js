@@ -1,10 +1,17 @@
-function Share(price) {
-  this.price = price;
-  this.owned = false;
-}
+import mongoose from "mongoose";
 
-Share.prototype.buy = function() {
-  this.owned = true;
-};
+let shareSchema = mongoose.Schema({
+  id: {
+    type: Number,
+  },
+  price: {
+    type: Number,
+    required: false
+  },
+  owned: {
+    type: Boolean,
+    required: false
+  }
+})
 
-module.exports = Share;
+module.exports = mongoose.model('Share', shareSchema);

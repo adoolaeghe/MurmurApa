@@ -1,38 +1,45 @@
 import mongoose from "mongoose";
 
-let songSchema = mongoose.Schema({
+const layerSchema = require('./layer').schema;
+
+let trackSchema = mongoose.Schema({
   id: {
     type: Number,
   },
-  songName: {
-    type: String,
-    required: true
+  priceIncrementor: {
+    type: Number,
+    required: false
   },
-  artistName: {
-    type: String,
-    required: true
+  shareIncrementor: {
+    type: Number,
+    required: false
   },
-  photoUrl: {
-    type: String,
-    required: true
+  crtNbShares: {
+    type: Number,
+    required: false
   },
-  songUrl: {
-    type: String,
-    required: true
+  crtSharePrice: {
+    type: Number,
+    required: false
   },
-  songSchema: {
-    type: Schema.Types.ObjectId, ref: 'songSchema'
+  crtRiskPrice: {
+    type: Number,
+    required: false
+  },
+  avgPrice: {
+    type: Number,
+    required: false
+  },
+  avgPriceNxtLyr: {
+    type: Number,
+    required: false
+  },
+  layers: {
+    type: layerSchema,
+    default: {
+      price: 0
+    }
   }
 })
 
-let songSchema = module.exports = mongoose.model('songSchema', songSchema);
-
-//Get All Murs
-module.exports.getAllMurs = (callback, limit) => {
-  Mur.find(callback);
-}
-
-//add a Murs
-module.exports.addMur = (mur, callback) => {
-  Mur.create(mur, callback);
-}
+module.exports = mongoose.model('trackSchema', trackSchema);

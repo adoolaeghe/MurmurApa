@@ -1,30 +1,22 @@
-var Share = require("./share.js");
+import mongoose from "mongoose";
 
-function Layer(shares, price) {
-  this.shares = [];
-  this.price = price;
-  this.sharesAvailable = shares;
-  for (i = 0; i < shares; i++) {
-    this.generateShare(price);
+const shareSchema = require('./share').schema;
+
+let layerSchema = mongoose.Schema({
+  id: {
+    type: Number,
+  },
+  price: {
+    type: Number,
+    required: false
+  },
+  totalPrice: {
+    type: Number,
+    required: false
+  },
+  shares: {
+    type: [shareSchema],
   }
-}
+})
 
-Layer.prototype.generateShare = function() {
-  share = new Share(this.price);
-  this.shares.push(share);
-};
-
-Layer.prototype.buyShare = function() {
-  this.shares[this.sharesAvailable - 1].buy();
-  this.sharesAvailable -= 1;
-};
-
-Layer.prototype.checkLayerFull = function() {
-  if (this.sharesAvailable === 0) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-module.exports = Layer;
+module.exports = mongoose.model('layerSchema', layerSchema);
