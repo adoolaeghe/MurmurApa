@@ -17,6 +17,16 @@ app.get('/', function(req,res){
   res.send("Please use the specified api routes")
 });
 
+/// MURS API
+app.get('/mur/all', function(req,res){
+  Mur.getAllMurs(function(err, murs){
+    if(err) {
+      throw err;
+    }
+    res.json(murs)
+  });
+});
+
 /// MUR API
 app.post('/mur', (req,res) => {
   let mur = req.body;
@@ -24,16 +34,21 @@ app.post('/mur', (req,res) => {
     if(err) {
       throw err;
     }
-    res.json(mur)
-  });
+    res.json(mur);
+  })
 });
 
 app.put('/mur', (req,res) => {
 
 });
 
-app.get('/mur:id', (req,res) => {
-
+app.get('/mur/:id', (req,res) => {
+  Mur.getMur(req.params.id, res, function(err, mur){
+    if(err) {
+      throw err;
+    }
+    res.json(mur)
+  })
 })
 
 app.post('/mur:id', (req,res) => {
@@ -44,15 +59,6 @@ app.delete('/mur:id', (req,res) => {
 
 })
 
-/// MURS API
-app.get('/mur/all', function(req,res){
-  Mur.getAllMurs(function(err, murs){
-    if(err) {
-      throw err;
-    }
-    res.json(murs)
-  });
-});
 
 /// USER API
 
