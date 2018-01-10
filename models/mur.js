@@ -84,8 +84,16 @@ module.exports.getMur = (id, res, callback) => {
 }
 
 //delete a specific Mur
-module.exports.deleteMur = (mur, callback) => {
-  // delete a specific mur here
+module.exports.deleteMur = (id, res, callback) => {
+  Mur.findByIdAndRemove(id, function (err, mur) {
+    if(!mur) {
+      res.send("no mur with this id")
+    }
+    var response = {
+        message: "Todo successfully deleted",
+    };
+    res.status(200).send(response);
+  });
 }
 
 let initializeTrackSchema = (trackSchema, murInstance) => {

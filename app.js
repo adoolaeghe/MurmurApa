@@ -47,7 +47,6 @@ app.get('/mur/:id', (req,res) => {
     if(err) {
       throw err;
     }
-    res.json(mur)
   })
 })
 
@@ -55,8 +54,12 @@ app.post('/mur:id', (req,res) => {
 
 })
 
-app.delete('/mur:id', (req,res) => {
-
+app.delete('/mur/:id', (req,res) => {
+  Mur.deleteMur(req.params.id, res, function(err, mur){
+    if(err) {
+      throw err;
+    }
+  })
 })
 
 
