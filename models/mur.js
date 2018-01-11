@@ -70,7 +70,15 @@ module.exports.addMur = (mur, callback) => {
 }
 
 //update a Mur
-module.exports.updateMur = (mur, callback) => {
+module.exports.updateMur = (id, body, res, callback) => {
+  Mur.findById(id, body, function (err, mur) {
+    if(!mur) {
+      res.send("no mur with this id")
+    }
+    mur.songName = body.songName;
+    mur.save();
+    res.json(mur);
+  });
 }
 
 //get a specific Mur
@@ -93,6 +101,24 @@ module.exports.deleteMur = (id, res, callback) => {
         message: "Todo successfully deleted",
     };
     res.status(200).send(response);
+  });
+}
+
+//delete a specific Mur
+module.exports.buyShare = (id, res, callback) => {
+  console.log(id)
+  Mur.findById(id,function (err, mur) {
+    if(!mur) {
+      res.send("no mur with this id")
+    }
+    for (var i = 0; i < mur.trackSchema.layers.shares.length; i++) {
+      if(!mur.trackSchema.layers.shares[i].owned){
+        mur.trackSchema.layers.shares[i].owned = true;
+        break;
+      }
+    }
+    mur.save();
+    res.json(mur);
   });
 }
 

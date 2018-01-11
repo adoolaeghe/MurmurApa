@@ -38,20 +38,22 @@ app.post('/mur', (req,res) => {
   })
 });
 
-app.put('/mur', (req,res) => {
-
+/// UPDATE NEW MUR
+app.put('/mur/:id', (req,res) => {
+  Mur.updateMur(req.params.id, req.body, res, function(err, mur){
+    if(err) {
+      throw err;
+    }
+  })
 });
 
+/// GET A MUR BY ID
 app.get('/mur/:id', (req,res) => {
   Mur.getMur(req.params.id, res, function(err, mur){
     if(err) {
       throw err;
     }
   })
-})
-
-app.post('/mur:id', (req,res) => {
-
 })
 
 app.delete('/mur/:id', (req,res) => {
@@ -62,6 +64,13 @@ app.delete('/mur/:id', (req,res) => {
   })
 })
 
+app.put('/mur/:id/buyshare', (req, res) => {
+  Mur.buyShare(req.params.id, res, function(err, mur) {
+    if(err) {
+      throw err;
+    }
+  })
+})
 
 /// USER API
 
