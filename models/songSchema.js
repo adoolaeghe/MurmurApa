@@ -35,9 +35,9 @@ let trackSchema = mongoose.Schema({
     required: false
   },
   layers: {
-    type: layerSchema,
+    type: [layerSchema],
     default: {
-      price: 0
+      price: 0,
     }
   }
 })

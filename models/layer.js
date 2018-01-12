@@ -16,6 +16,9 @@ let layerSchema = mongoose.Schema({
   },
   shares: {
     type: [shareSchema],
+  },
+  sharesAvailable: {
+    type: Number,
   }
 })
 
