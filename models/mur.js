@@ -1,4 +1,11 @@
 import mongoose from "mongoose";
+import {initializeTrackSchema,
+        initializeDefaultSchema,
+        initializeTrackSchemaLayer,
+        addInitialSharetoLayer,
+        addSharetoLayer,
+        switchShareProperty,
+        createNewLayer} from "../helpers/murSchema";
 
 const trackSchema = require('./songSchema').schema;
 const shareSchema = require('./share').schema;
@@ -61,10 +68,10 @@ module.exports.getAllMurs = (callback) => {
 //add a Mur
 module.exports.addMur = (mur, callback) => {
   let murInstance = new Mur(mur);
-  let trackSchema = murInstance.trackSchema
+  let trackSchema = murInstance.trackSchema;
   initializeTrackSchema(trackSchema, murInstance)
   for (var x = 0; x < murInstance.initialNbOfShare; x++) {
-    addInitialSharetoLayer(trackSchema, murInstance)
+    addInitialSharetoLayer(trackSchema, murInstance, Share)
   }
   murInstance.save(mur, callback)
 }
@@ -115,58 +122,28 @@ module.exports.buyShare = (id, res, callback) => {
     let trackLayers = trackSchema.layers;
     let lastTrackLayers = trackLayers[(trackLayers.length)-1];
     let lastTrackLayerSharesNb = lastTrackLayers.shares.length;
+    let newTrackLayers = {};
 
     for (var i = 0; i < lastTrackLayerSharesNb; i++) {
-      if(!lastTrackLayers.shares[i].owned){
-        switchShareProperty(lastTrackLayers, i)
+      if(!lastTrackLayers.shares[i].owned) {
+        switchShareProperty(lastTrackLayers, i);
         if(lastTrackLayers.sharesAvailable === 0) {
-          createNewLayer(trackLayers, lastTrackLayers, trackSchema);
-          for (var x = 0; x < lastTrackLayers.sharesAvailable; x++) {
-            addSharetoLayer(trackLayers, lastTrackLayers, trackSchema);
+          createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
+          newTrackLayers = trackLayers[(trackLayers.length)-1];
+          newTrackLayers.sharesAvailable = (trackLayers[(trackLayers.length)-2].shares.length) * trackSchema.shareIncrementor;
+          for (var x = 0; x < newTrackLayers.sharesAvailable; x++) {
+            addSharetoLayer(trackLayers, newTrackLayers, trackSchema, Share);
           }
         }
         break;
       }
     }
+
     mur.save();
     var response = {
-        message: "Congratulation ! You successfully bought a new share !",
-        shares: lastTrackLayers
+        message: "You successfully bought a new share !",
+        layers: trackSchema
     };
     res.status(200).send(response);
   });
-}
-
-let initializeTrackSchema = (trackSchema, murInstance) => {
-  trackSchema.crtNbShares = murInstance.initialNbOfShare;
-  trackSchema.shareIncrementor = murInstance.shareIncrementor;
-  trackSchema.priceIncrementor = murInstance.priceIncrementor;
-  trackSchema.crtSharePrice = murInstance.initialSharePrice;
-  trackSchema.layers.price = murInstance.initialSharePrice;
-  trackSchema.layers[0].totalPrice = (murInstance.initialSharePrice * murInstance.initialNbOfShare);
-  trackSchema.layers[0].sharesAvailable = murInstance.initialNbOfShare;
-}
-
-let addInitialSharetoLayer = (trackSchema, murInstance) => {
-  let initialShareInstance = new Share();
-  initialShareInstance.price = murInstance.initialSharePrice;
-  initialShareInstance.owned = "false";
-  trackSchema.layers[0].shares.push(initialShareInstance);
-}
-
-let addSharetoLayer = (trackLayers, lastTrackLayers, trackSchema) => {
-  let shareInstance = new Share();
-  shareInstance.price = trackSchema.initialSharePrice * trackSchema.shareIncrementor;
-  shareInstance.owned = "false";
-  lastTrackLayers.shares.push(shareInstance);
-}
-
-let switchShareProperty = (lastTrackLayers, i) => {
-  lastTrackLayers.shares[i].owned = true;
-  lastTrackLayers.sharesAvailable -= 1;
-}
-
-let createNewLayer = (trackLayers, lastTrackLayers, trackSchema) => {
-  trackLayers.push(new Layer());
-  lastTrackLayers.sharesAvailable = (trackLayers[(trackLayers.length)-2].shares.length) * trackSchema.shareIncrementor;
 }

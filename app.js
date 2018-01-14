@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 
 let app = express();
 import Mur from './models/mur'
+import User from './models/user'
 
 app.use(bodyParser.json())
 
@@ -75,7 +76,24 @@ app.put('/mur/:id/buyshare', (req, res) => {
 /// USER API
 
 app.post('/user', (req,res) => {
+  let user = req.body;
+  User.createUser(user, function(err, user) {
+    if(err) {
+      throw err;
+    }
+    res.json(user);
+  })
+});
 
+/// MURS API
+app.get('/user/all', function(req,res){
+  User.getAllUsers(function(err, users){
+    if(err) {
+      throw err;
+    }
+    console.log('her')
+    res.json(users)
+  });
 });
 
 app.get('/user/login', (req,res) => {

@@ -27,19 +27,25 @@ let userSchema = mongoose.Schema({
   },
   rumBalance: {
     type: String,
-    required: true
+    required: false
   },
   ownedShare: {
     type: String,
-    required: true
+    required: false
   },
 })
 
-let userSchema = module.exports = mongoose.model('userSchema', userSchema);
-
+let User = module.exports = mongoose.model('userSchema', userSchema);
 //Post user
-module.exports.createUser = (callback, limit) => {
-  //create a new user here
+module.exports.createUser = (user, callback) => {
+  let userInstance = new User(user);
+  userInstance.userName = user.userName;
+  userInstance.firstName = user.firstName;
+  userInstance.lastName = user.lastName;
+  userInstance.email = user.email;
+  userInstance.password = user.password;
+  userInstance.rumBalance = user.rumBalance;
+  userInstance.save(user, callback);
 }
 
 //Login user
@@ -55,6 +61,12 @@ module.exports.logoutUser = (callback, limit) => {
 //Get a specific user
 module.exports.getUser = (callback, limit) => {
   //get a specific user here.
+}
+
+//Get a specific user
+module.exports.getAllUsers = (callback) => {
+  console.log('here')
+  User.find(callback);
 }
 
 //Put a specific user
