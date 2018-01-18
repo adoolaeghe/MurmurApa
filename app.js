@@ -1,22 +1,50 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-
+import passport from 'passport';
+import expressSession from 'express-session'
+var LocalStrategy = require('passport-local').Strategy;
 
 let app = express();
 import Mur from './models/mur'
 import User from './models/user'
 
+// Passport set up
+passport.use(new LocalStrategy(User.authenticate()));
+
+// Using the flash middleware provided by connect-flash to store messages in session
+// and displaying in templates
+var flash = require('connect-flash');
+app.use(flash());
+
+// Initialize Passport
+var initPassport = require('./passport/init');
+initPassport(passport);
+
+// BodyParser
 app.use(bodyParser.json())
+
+//use sessions for tracking logins
+app.use(expressSession({
+  secret: 'work hard',
+  resave: true,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Connect to mongoose
 mongoose.connect('mongodb://localhost/MURMUR_TEST')
 let db = mongoose.connection
 
+var path = require('path');
+var routes = require('./routes/index')(passport);
+app.use('/', routes);
 
-app.get('/', function(req,res){
-  res.send("Please use the specified api routes")
-});
+// app.get('/', function(req,res){
+//   res.send("Please use the specified api routes")
+// });
 
 /// MURS API
 app.get('/mur/all', function(req,res){
@@ -75,46 +103,50 @@ app.put('/mur/:id/buyshare', (req, res) => {
 
 /// USER API
 
-app.post('/user', (req,res) => {
-  let user = req.body;
-  User.createUser(user, function(err, user) {
-    if(err) {
-      throw err;
-    }
-    res.json(user);
-  })
-});
+// app.post('/signup', passport.authenticate('signup', {
+//    failureFlash : true
+//  }));
+
+// app.post('/user', (req,res) => {
+//   let user = req.body;
+//   User.createUser(user, function(err, user) {
+//     if(err) {
+//       throw err;
+//     }
+//     res.json(user);
+//   })
+// });
 
 /// MURS API
-app.get('/user/all', function(req,res){
-  User.getAllUsers(function(err, users){
-    if(err) {
-      throw err;
-    }
-    console.log('her')
-    res.json(users)
-  });
-});
+// app.get('/user/all', function(req,res){
+//   User.getAllUsers(function(err, users){
+//     if(err) {
+//       throw err;
+//     }
+//     console.log('her')
+//     res.json(users)
+//   });
+// });
+//
+// app.post('/user/login', (req,res) => {
+//
+// });
+//
+// app.get('/user/logout', (req,res) => {
+//
+// });
+//
+// app.get('/user/:username', (req,res) => {
+//
+// });
+//
+// app.put('/user/:username', (req,res) => {
+//
+// });
+//
+// app.delete('/user/:username', (req,res) => {
+//
+// });
 
-app.get('/user/login', (req,res) => {
-
-});
-
-app.get('/user/logout', (req,res) => {
-
-});
-
-app.get('/user/:username', (req,res) => {
-
-});
-
-app.put('/user/:username', (req,res) => {
-
-});
-
-app.delete('/user/:username', (req,res) => {
-
-});
-
-app.listen(3000)
-console.log('Running on port 3000')
+app.listen(8080)
+console.log('Running on port 8080')

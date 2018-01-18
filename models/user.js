@@ -1,11 +1,14 @@
 // This is the API model for users.
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+
+var passportLocalMongoose = require('passport-local-mongoose');
 
 let userSchema = mongoose.Schema({
   id: {
     type: Number,
   },
-  userName: {
+  username: {
     type: String,
     required: true
   },
@@ -35,9 +38,23 @@ let userSchema = mongoose.Schema({
   },
 })
 
+userSchema.pre('save', function (next) {
+  var user = this;
+  bcrypt.hash(user.password, 10, function (err, hash){
+    if (err) {
+      return next(err);
+    }
+    user.password = hash;
+    next();
+  })
+});
+
+userSchema.plugin(passportLocalMongoose);
+
 let User = module.exports = mongoose.model('userSchema', userSchema);
 //Post user
 module.exports.createUser = (user, callback) => {
+
   let userInstance = new User(user);
   userInstance.userName = user.userName;
   userInstance.firstName = user.firstName;
