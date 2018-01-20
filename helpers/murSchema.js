@@ -30,9 +30,11 @@ export function addSharetoLayer(trackLayers, newTrackLayers, trackSchema, Share)
   newTrackLayers.shares.push(shareInstance);
 }
 
-export function switchShareProperty(lastTrackLayers, i) {
+export function switchShareProperty(lastTrackLayers, i, sessionUser) {
   lastTrackLayers.shares[i].owned = true;
+  lastTrackLayers.shares[i].owner = sessionUser;
   lastTrackLayers.sharesAvailable -= 1;
+
 }
 
 export function createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer) {

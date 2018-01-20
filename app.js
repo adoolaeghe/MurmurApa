@@ -21,7 +21,6 @@ app.use(flash());
 var initPassport = require('./passport/init');
 initPassport(passport);
 
-// BodyParser
 app.use(bodyParser.json())
 
 //use sessions for tracking logins
@@ -31,6 +30,7 @@ app.use(expressSession({
   saveUninitialized: false
 }));
 
+// initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -39,15 +39,19 @@ mongoose.connect('mongodb://localhost/MURMUR_TEST')
 let db = mongoose.connection
 
 var path = require('path');
-var routes = require('./routes/index')(passport);
+var routes = require('./routes/user')(passport);
+
 app.use('/', routes);
 
-// app.get('/', function(req,res){
-//   res.send("Please use the specified api routes")
-// });
+var isAuthenticated = function (req, res, next) {
+	if (req.isAuthenticated()){
+    return next();
+  }
+  res.send('you are note authenticated !!')
+}
 
 /// MURS API
-app.get('/mur/all', function(req,res){
+app.get('/mur/all',isAuthenticated, function(req,res){
   Mur.getAllMurs(function(err, murs){
     if(err) {
       throw err;
@@ -57,7 +61,7 @@ app.get('/mur/all', function(req,res){
 });
 
 /// MUR API
-app.post('/mur', (req,res) => {
+app.post('/mur',isAuthenticated,(req,res) => {
   let mur = req.body;
   Mur.addMur(mur, function(err, mur){
     if(err) {
@@ -68,7 +72,7 @@ app.post('/mur', (req,res) => {
 });
 
 /// UPDATE NEW MUR
-app.put('/mur/:id', (req,res) => {
+app.put('/mur/:id',isAuthenticated,(req,res) => {
   Mur.updateMur(req.params.id, req.body, res, function(err, mur){
     if(err) {
       throw err;
@@ -77,7 +81,7 @@ app.put('/mur/:id', (req,res) => {
 });
 
 /// GET A MUR BY ID
-app.get('/mur/:id', (req,res) => {
+app.get('/mur/:id',isAuthenticated,(req,res) => {
   Mur.getMur(req.params.id, res, function(err, mur){
     if(err) {
       throw err;
@@ -85,7 +89,7 @@ app.get('/mur/:id', (req,res) => {
   })
 })
 
-app.delete('/mur/:id', (req,res) => {
+app.delete('/mur/:id',isAuthenticated,(req,res) => {
   Mur.deleteMur(req.params.id, res, function(err, mur){
     if(err) {
       throw err;
@@ -93,60 +97,13 @@ app.delete('/mur/:id', (req,res) => {
   })
 })
 
-app.put('/mur/:id/buyshare', (req, res) => {
-  Mur.buyShare(req.params.id, res, function(err, mur) {
+app.put('/mur/:id/buyshare',isAuthenticated,(req, res) => {
+  Mur.buyShare(req.params.id, res, req, function(err, mur) {
     if(err) {
       throw err;
     }
   })
 })
-
-/// USER API
-
-// app.post('/signup', passport.authenticate('signup', {
-//    failureFlash : true
-//  }));
-
-// app.post('/user', (req,res) => {
-//   let user = req.body;
-//   User.createUser(user, function(err, user) {
-//     if(err) {
-//       throw err;
-//     }
-//     res.json(user);
-//   })
-// });
-
-/// MURS API
-// app.get('/user/all', function(req,res){
-//   User.getAllUsers(function(err, users){
-//     if(err) {
-//       throw err;
-//     }
-//     console.log('her')
-//     res.json(users)
-//   });
-// });
-//
-// app.post('/user/login', (req,res) => {
-//
-// });
-//
-// app.get('/user/logout', (req,res) => {
-//
-// });
-//
-// app.get('/user/:username', (req,res) => {
-//
-// });
-//
-// app.put('/user/:username', (req,res) => {
-//
-// });
-//
-// app.delete('/user/:username', (req,res) => {
-//
-// });
 
 app.listen(8080)
 console.log('Running on port 8080')

@@ -11,6 +11,10 @@ let shareSchema = mongoose.Schema({
   owned: {
     type: Boolean,
     required: false
+  },
+  owner: {
+    type: String,
+    required: false
   }
 })
 

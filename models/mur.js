@@ -112,12 +112,12 @@ module.exports.deleteMur = (id, res, callback) => {
 }
 
 //delete a specific Mur
-module.exports.buyShare = (id, res, callback) => {
-  Mur.findById(id,function (err, mur) {
+module.exports.buyShare = (id, res, req, callback) => {
+  const sessionUser = req.session.passport.user;
+  Mur.findById(id, function(err, mur) {
     if(!mur) {
       res.send("no mur with this id")
     }
-
     let trackSchema = mur.trackSchema
     let trackLayers = trackSchema.layers;
     let lastTrackLayers = trackLayers[(trackLayers.length)-1];
@@ -125,8 +125,9 @@ module.exports.buyShare = (id, res, callback) => {
     let newTrackLayers = {};
 
     for (var i = 0; i < lastTrackLayerSharesNb; i++) {
+      console.log(typeof sessionUser);
       if(!lastTrackLayers.shares[i].owned) {
-        switchShareProperty(lastTrackLayers, i);
+        switchShareProperty(lastTrackLayers, i, sessionUser);
         if(lastTrackLayers.sharesAvailable === 0) {
           createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
           newTrackLayers = trackLayers[(trackLayers.length)-1];
