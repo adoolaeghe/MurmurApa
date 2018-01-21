@@ -69,7 +69,7 @@ app.get('/mur/all',isAuthenticated, function(req,res){
 /// MUR API
 app.post('/mur',isAuthenticated,(req,res) => {
   let mur = req.body;
-  Mur.addMur(mur, function(err, mur){
+  Mur.addMur(mur, function(err, mur) {
     if(err) {
       throw err;
     }

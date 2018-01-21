@@ -25,7 +25,7 @@ module.exports = function(passport) {
 		failureFlash : true
 	}));
 
-	// Handle Logout //
+	// HANDLE LOGOUT //
 	router.get('/signout',isAuthenticated, function(req, res, next) {
 	  req.logout();
 	  req.session.destroy(function (err) {
@@ -34,19 +34,29 @@ module.exports = function(passport) {
 	  });
 	});
 
-	// Store an instance of a share//
-	router.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
-	  let shareId = req.session.share;
-	  User.storeShare(req.params.id, shareId, res, req, function(err, mur) {
+	//GET A SPECIFIC USER//
+	router.get('/user/:id',isAuthenticated, (req, res) => {
+	  User.getUser(req.params.id, res, function(err, user) {
 	    if(err) {
 	      throw err;
 	    }
 	  })
 	})
 
-	// Store an instance of a share//
-	router.get('/user/:id',isAuthenticated, (req, res) => {
-	  User.getUser(req.params.id, res, function(err, user) {
+	//GET A SPECIFIC USER//
+	router.get('/users', isAuthenticated, (req, res) => {
+		User.getAllUsers(function(err, users){
+	    if(err) {
+	      throw err;
+	    }
+	    res.json(users)
+	  });
+	})
+
+	//USER STORE AN INSTANCE OF SHARE IT BOUGHT//
+	router.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
+	  let shareId = req.session.share;
+	  User.storeShare(req.params.id, shareId, res, req, function(err, mur) {
 	    if(err) {
 	      throw err;
 	    }

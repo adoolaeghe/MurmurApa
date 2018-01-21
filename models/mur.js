@@ -63,12 +63,12 @@ let Share = mongoose.model('Share', shareSchema);
 let Layer = mongoose.model('Layer', layerSchema);
 let User = mongoose.model('User', userSchema);
 
-//Get All Murs
+//GET ALL THE MUR//
 module.exports.getAllMurs = (callback) => {
   Mur.find(callback);
 }
 
-//add a Mur
+//ADD A MUR//
 module.exports.addMur = (mur, callback) => {
   let murInstance = new Mur(mur);
   let trackSchema = murInstance.trackSchema;
@@ -79,7 +79,7 @@ module.exports.addMur = (mur, callback) => {
   murInstance.save(mur, callback)
 }
 
-//update a Mur
+//UPDATE A MUR//
 module.exports.updateMur = (id, body, res, callback) => {
   Mur.findById(id, body, function (err, mur) {
     if(!mur) {
@@ -91,7 +91,7 @@ module.exports.updateMur = (id, body, res, callback) => {
   });
 }
 
-//get a specific Mur
+//GET A SPECIFIC MUR//
 module.exports.getMur = (id, res, callback) => {
   Mur.findById(id, function (err, mur) {
     if(!mur) {

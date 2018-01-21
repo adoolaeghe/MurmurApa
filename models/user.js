@@ -42,9 +42,14 @@ let userSchema = mongoose.Schema({
 userSchema.plugin(passportLocalMongoose);
 let User = module.exports = mongoose.model('userSchema', userSchema);
 
-//get a specific User
+// GET ALL THE USERS
+module.exports.getAllUsers = (callback) => {
+  console.log("here")
+  User.find(callback);
+}
+
+//GET A SPECIFIC USER
 module.exports.getUser = (id, res, callback) => {
-  console.log(id)
   User.findById(id, function (err, user) {
     if(!user) {
       res.send("no user with this id")
