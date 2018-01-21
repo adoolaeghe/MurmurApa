@@ -6,6 +6,7 @@ export function initializeTrackSchema(trackSchema, murInstance) {
 export function initializeDefaultTrackSchema(trackSchema, murInstance) {
   trackSchema.crtNbShares = murInstance.initialNbOfShare;
   trackSchema.shareIncrementor = murInstance.shareIncrementor;
+  trackSchema.initialSharePrice = murInstance.initialSharePrice;
   trackSchema.priceIncrementor = murInstance.priceIncrementor;
   trackSchema.crtSharePrice = murInstance.initialSharePrice;
   trackSchema.layers.price = murInstance.initialSharePrice;

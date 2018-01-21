@@ -30,7 +30,7 @@ let userSchema = mongoose.Schema({
     required: true
   },
   rumBalance: {
-    type: String,
+    type: Number,
     required: false
   },
   ownedShare: {
@@ -44,7 +44,6 @@ let User = module.exports = mongoose.model('userSchema', userSchema);
 
 // GET ALL THE USERS
 module.exports.getAllUsers = (callback) => {
-  console.log("here")
   User.find(callback);
 }
 
@@ -52,9 +51,9 @@ module.exports.getAllUsers = (callback) => {
 module.exports.getUser = (id, res, callback) => {
   User.findById(id, function (err, user) {
     if(!user) {
-      res.send("no user with this id")
+      res.send("no user with this id");
     }
-    res.json(user)
+    res.json(user);
   });
 }
 
@@ -64,5 +63,5 @@ module.exports.storeShare = (id, shareId, res, req, callback) => {
     user.ownedShare.push(shareId);
     user.save();
   });
-  res.status(200).send('you have bought a new share !!')
+  res.status(200).send('you have bought a new share !!');
 };

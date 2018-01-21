@@ -14,6 +14,10 @@ let trackSchema = mongoose.Schema({
     type: Number,
     required: false
   },
+  initialSharePrice: {
+    type: Number,
+    required: false
+  },
   crtNbShares: {
     type: Number,
     required: false

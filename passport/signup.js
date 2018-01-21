@@ -9,7 +9,6 @@ module.exports = function(passport, err){
         },
         function(req, username, password, done) {
             var findOrCreateUser = function(err){
-              console.log
                 // find a user in Mongo with provided username
                 User.findOne({ 'userName' :  username }, function(err, user) {
                     if (err){
@@ -27,6 +26,7 @@ module.exports = function(passport, err){
                         newUser.email = req.param('email');
                         newUser.firstName = req.param('firstName');
                         newUser.lastName = req.param('lastName');
+                        newUser.rumBalance = req.param('rumBalance');
                         // save the user
                         newUser.save(function(err) {
                             if (err){
@@ -34,6 +34,7 @@ module.exports = function(passport, err){
                                 throw err;
                             }
                             console.log('User Registration succesful');
+                            req.session.user = newUser
                             return done(null, newUser);
                         });
                     }

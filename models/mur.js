@@ -116,23 +116,28 @@ module.exports.deleteMur = (id, res, callback) => {
 
 //BUY SHARE OF A MUR//
 module.exports.buyShare = (id, res, req, callback) => {
-  const sessionUser = req.session.passport.user;
+  let sessionUser = req.session.user;
+  const sessionUserId = req.session.passport.user;
 
   Mur.findById(id, function(err, mur) {
     if(!mur) {
-      res.send("no mur with this id")
+      res.send("no mur with this id");
     }
 
-    let trackSchema = mur.trackSchema
+    let trackSchema = mur.trackSchema;
     let trackLayers = trackSchema.layers;
     let lastTrackLayers = trackLayers[(trackLayers.length)-1];
     let lastTrackLayerSharesNb = lastTrackLayers.shares.length;
-    let shareId = ""
+    let shareId = "";
     let newTrackLayers = {};
 
     for (var i = 0; i < lastTrackLayerSharesNb; i++) {
       if(!lastTrackLayers.shares[i].owned) {
-        switchShareProperty(lastTrackLayers, i, sessionUser);
+        if(sessionUser.rumBalance < lastTrackLayers.shares[i].price) {
+          res.send("unsufficient Rum Balance ");
+          return
+        }
+        switchShareProperty(lastTrackLayers, i, sessionUserId);
         shareId = lastTrackLayers.shares[i]._id;
         if(lastTrackLayers.sharesAvailable === 0) {
           createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
@@ -151,6 +156,6 @@ module.exports.buyShare = (id, res, req, callback) => {
         message: "You successfully bought a new share !",
         share: lastTrackLayerSharesNb
     };
-    res.redirect('/user/' + sessionUser + '/storeShare');
+    res.redirect('/user/' + sessionUserId + '/storeShare');
   });
 }
