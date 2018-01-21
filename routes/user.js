@@ -2,8 +2,9 @@ var express = require('express');
 var router = express.Router();
 
 var isAuthenticated = function (req, res, next) {
-	if (req.isAuthenticated())
-		return next();
+	if (req.isAuthenticated()){
+    return next();
+  }
 }
 
 module.exports = function(passport){
@@ -22,8 +23,7 @@ module.exports = function(passport){
 	}));
 
 	// Handle Logout //
-	router.get('/signout', function(req, res) {
-		isAuthenticated(req);
+	router.get('/signout',isAuthenticated, function(req, res, next) {
 	  req.logout();
 	  req.session.destroy(function (err) {
 	    if (err) { return next(err); }

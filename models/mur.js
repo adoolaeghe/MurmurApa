@@ -10,6 +10,7 @@ import {initializeTrackSchema,
 const trackSchema = require('./songSchema').schema;
 const shareSchema = require('./share').schema;
 const layerSchema = require('./layer').schema;
+const userSchema = require('./user').schema;
 
 let Schema = mongoose.Schema;
 
@@ -59,6 +60,7 @@ let murSchema = mongoose.Schema({
 let Mur = module.exports = mongoose.model('Mur', murSchema);
 let Share = mongoose.model('Share', shareSchema);
 let Layer = mongoose.model('Layer', layerSchema);
+let User = mongoose.model('User', userSchema);
 //Get All Murs
 
 module.exports.getAllMurs = (callback) => {
@@ -114,20 +116,23 @@ module.exports.deleteMur = (id, res, callback) => {
 //delete a specific Mur
 module.exports.buyShare = (id, res, req, callback) => {
   const sessionUser = req.session.passport.user;
+
   Mur.findById(id, function(err, mur) {
     if(!mur) {
       res.send("no mur with this id")
     }
+
     let trackSchema = mur.trackSchema
     let trackLayers = trackSchema.layers;
     let lastTrackLayers = trackLayers[(trackLayers.length)-1];
     let lastTrackLayerSharesNb = lastTrackLayers.shares.length;
+    let shareId = ""
     let newTrackLayers = {};
 
     for (var i = 0; i < lastTrackLayerSharesNb; i++) {
-      console.log(typeof sessionUser);
       if(!lastTrackLayers.shares[i].owned) {
         switchShareProperty(lastTrackLayers, i, sessionUser);
+        shareId = lastTrackLayers.shares[i]._id;
         if(lastTrackLayers.sharesAvailable === 0) {
           createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
           newTrackLayers = trackLayers[(trackLayers.length)-1];
@@ -139,12 +144,12 @@ module.exports.buyShare = (id, res, req, callback) => {
         break;
       }
     }
-
     mur.save();
+    req.session.share = shareId
     var response = {
         message: "You successfully bought a new share !",
-        layers: trackSchema
+        share: lastTrackLayerSharesNb
     };
-    res.status(200).send(response);
+    res.redirect('/user/' + sessionUser + '/storeShare');
   });
 }

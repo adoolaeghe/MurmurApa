@@ -6,6 +6,7 @@ import expressSession from 'express-session'
 var LocalStrategy = require('passport-local').Strategy;
 
 let app = express();
+
 import Mur from './models/mur'
 import User from './models/user'
 
@@ -51,6 +52,11 @@ var isAuthenticated = function (req, res, next) {
 }
 
 /// MURS API
+app.get('/', function(req,res){
+  res.send('heelo')
+});
+
+/// MURS API
 app.get('/mur/all',isAuthenticated, function(req,res){
   Mur.getAllMurs(function(err, murs){
     if(err) {
@@ -81,7 +87,7 @@ app.put('/mur/:id',isAuthenticated,(req,res) => {
 });
 
 /// GET A MUR BY ID
-app.get('/mur/:id',isAuthenticated,(req,res) => {
+app.get('/mur/:id', isAuthenticated,(req,res) => {
   Mur.getMur(req.params.id, res, function(err, mur){
     if(err) {
       throw err;
@@ -97,13 +103,23 @@ app.delete('/mur/:id',isAuthenticated,(req,res) => {
   })
 })
 
-app.put('/mur/:id/buyshare',isAuthenticated,(req, res) => {
+app.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {
   Mur.buyShare(req.params.id, res, req, function(err, mur) {
     if(err) {
       throw err;
     }
   })
 })
+
+app.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
+  let shareId = req.session.share;
+  User.storeShare(req.params.id, shareId, res, req, function(err, mur) {
+    if(err) {
+      throw err;
+    }
+  })
+})
+
 
 app.listen(8080)
 console.log('Running on port 8080')

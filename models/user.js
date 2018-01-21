@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 var passportLocalMongoose = require('passport-local-mongoose');
+const murSchema = require('./mur').schema;
 
 let userSchema = mongoose.Schema({
   id: {
@@ -33,11 +34,18 @@ let userSchema = mongoose.Schema({
     required: false
   },
   ownedShare: {
-    type: String,
+    type: Array,
     required: false
   },
 })
 
 userSchema.plugin(passportLocalMongoose);
-
 let User = module.exports = mongoose.model('userSchema', userSchema);
+
+module.exports.storeShare = (id, shareId, res, req, callback) => {
+  User.findById(id, function(err, user) {
+    user.ownedShare.push(shareId);
+    user.save();
+  });
+  res.status(200).send('you have bought a new share !!')
+};
