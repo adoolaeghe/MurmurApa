@@ -65,3 +65,12 @@ module.exports.storeShare = (id, shareId, res, req, callback) => {
   });
   res.status(200).send('you have bought a new share !!');
 };
+
+module.exports.topUp = (id, amount, res, req, callback) => {
+  User.findById(id, function(err, user) {
+    user.rumBalance += amount;
+    user.save();
+    req.session.user = user;
+    res.status(200).send(user);
+  });
+};

@@ -63,6 +63,16 @@ module.exports = function(passport) {
 	  })
 	})
 
+	//USER STORE AN INSTANCE OF SHARE IT BOUGHT//
+	router.put('/user/topup',isAuthenticated, (req, res, next) => {
+		let amount = req.body.amount;
+	  User.topUp(req.session.passport.user, amount, res, req, function(err, mur) {
+	    if(err) {
+	      throw err;
+	    }
+	  })
+	})
+
 	router.get('/successjson', function(req, res) {
 	  res.json({ message: 'sucess',
 	 						 authenticated: req.isAuthenticated()});

@@ -123,7 +123,8 @@ module.exports.buyShare = (id, res, req, callback) => {
     if(!mur) {
       res.send("no mur with this id");
     }
-
+    /// EXTRACT THIS INTO A CLASSSS
+    
     let trackSchema = mur.trackSchema;
     let trackLayers = trackSchema.layers;
     let lastTrackLayers = trackLayers[(trackLayers.length)-1];
