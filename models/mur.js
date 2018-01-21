@@ -57,12 +57,13 @@ let murSchema = mongoose.Schema({
     }
   }
 })
+
 let Mur = module.exports = mongoose.model('Mur', murSchema);
 let Share = mongoose.model('Share', shareSchema);
 let Layer = mongoose.model('Layer', layerSchema);
 let User = mongoose.model('User', userSchema);
-//Get All Murs
 
+//Get All Murs
 module.exports.getAllMurs = (callback) => {
   Mur.find(callback);
 }
@@ -100,7 +101,7 @@ module.exports.getMur = (id, res, callback) => {
   });
 }
 
-//delete a specific Mur
+//DELETE A SPECIFIC MUR//
 module.exports.deleteMur = (id, res, callback) => {
   Mur.findByIdAndRemove(id, function (err, mur) {
     if(!mur) {
@@ -113,7 +114,7 @@ module.exports.deleteMur = (id, res, callback) => {
   });
 }
 
-//delete a specific Mur
+//BUY SHARE OF A MUR//
 module.exports.buyShare = (id, res, req, callback) => {
   const sessionUser = req.session.passport.user;
 

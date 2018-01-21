@@ -42,6 +42,18 @@ let userSchema = mongoose.Schema({
 userSchema.plugin(passportLocalMongoose);
 let User = module.exports = mongoose.model('userSchema', userSchema);
 
+//get a specific User
+module.exports.getUser = (id, res, callback) => {
+  console.log(id)
+  User.findById(id, function (err, user) {
+    if(!user) {
+      res.send("no user with this id")
+    }
+    res.json(user)
+  });
+}
+
+
 module.exports.storeShare = (id, shareId, res, req, callback) => {
   User.findById(id, function(err, user) {
     user.ownedShare.push(shareId);
