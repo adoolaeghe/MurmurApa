@@ -123,13 +123,15 @@ module.exports.buyShare = (id, res, req, callback) => {
     if(!mur) {
       res.send("no mur with this id");
     }
+
     /// EXTRACT THIS INTO A CLASSSS
-    
+
     let trackSchema = mur.trackSchema;
     let trackLayers = trackSchema.layers;
     let lastTrackLayers = trackLayers[(trackLayers.length)-1];
     let lastTrackLayerSharesNb = lastTrackLayers.shares.length;
     let shareId = "";
+    let sharePrice = null
     let newTrackLayers = {};
 
     for (var i = 0; i < lastTrackLayerSharesNb; i++) {
@@ -140,6 +142,7 @@ module.exports.buyShare = (id, res, req, callback) => {
         }
         switchShareProperty(lastTrackLayers, i, sessionUserId);
         shareId = lastTrackLayers.shares[i]._id;
+        sharePrice = lastTrackLayers.shares[i].price;
         if(lastTrackLayers.sharesAvailable === 0) {
           createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
           newTrackLayers = trackLayers[(trackLayers.length)-1];
@@ -152,11 +155,17 @@ module.exports.buyShare = (id, res, req, callback) => {
       }
     }
     mur.save();
-    req.session.share = shareId
+    req.session.share = shareId;
+    req.session.sharePrice = sharePrice;
     var response = {
         message: "You successfully bought a new share !",
         share: lastTrackLayerSharesNb
     };
     res.redirect('/user/' + sessionUserId + '/storeShare');
   });
+}
+
+//BUY SHARE OF A MUR//
+module.exports.sellShare = (id, res, req, callback) => {
+
 }

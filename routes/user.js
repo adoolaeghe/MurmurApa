@@ -11,14 +11,14 @@ var isAuthenticated = function (req, res, next) {
 
 module.exports = function(passport) {
 
-	// Handle Login POST //
+	// HANDLE LOGIN POST //
 	router.post('/login', passport.authenticate('login', {
 		successRedirect: '/successjson',
 		failureRedirect: '/failurejson',
 		failureFlash : true
 	}));
 
-	// Handle Registration POST //
+	// HANFLE REGISTRATION POST //
 	router.post('/signup', passport.authenticate('signup', {
 		successRedirect: '/successjson',
 		failureRedirect: '/failurejson',
@@ -55,15 +55,17 @@ module.exports = function(passport) {
 
 	//USER STORE AN INSTANCE OF SHARE IT BOUGHT//
 	router.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
+		console.log(req.session.user.rumBalance)
 	  let shareId = req.session.share;
-	  User.storeShare(req.params.id, shareId, res, req, function(err, mur) {
+		let sharePrice = req.session.sharePrice;
+	  User.storeShare(req.params.id, shareId, sharePrice, res, req, function(err, mur) {
 	    if(err) {
 	      throw err;
 	    }
 	  })
 	})
 
-	//USER STORE AN INSTANCE OF SHARE IT BOUGHT//
+	//USER CAN STORE AN INSTANCE OF SHARE IT BOUGHT//
 	router.put('/user/topup',isAuthenticated, (req, res, next) => {
 		let amount = req.body.amount;
 	  User.topUp(req.session.passport.user, amount, res, req, function(err, mur) {
@@ -73,11 +75,13 @@ module.exports = function(passport) {
 	  })
 	})
 
+	//USER SUCCESS AUTHENTICATION//
 	router.get('/successjson', function(req, res) {
 	  res.json({ message: 'sucess',
 	 						 authenticated: req.isAuthenticated()});
 	});
 
+	//USER FAILURE AUTHENTICATION//
 	router.get('/failurejson', function(req, res) {
     res.json({ message: 'failure'});
 	});

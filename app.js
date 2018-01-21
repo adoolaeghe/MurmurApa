@@ -111,14 +111,6 @@ app.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {
   })
 })
 
-app.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
-  let shareId = req.session.share;
-  User.storeShare(req.params.id, shareId, res, req, function(err, mur) {
-    if(err) {
-      throw err;
-    }
-  })
-})
 
 
 app.listen(8080)

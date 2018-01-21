@@ -57,13 +57,15 @@ module.exports.getUser = (id, res, callback) => {
   });
 }
 
-
-module.exports.storeShare = (id, shareId, res, req, callback) => {
+//GET A STORE A SHARE USER
+module.exports.storeShare = (id, shareId, sharePrice, res, req, callback) => {
   User.findById(id, function(err, user) {
     user.ownedShare.push(shareId);
+    user.rumBalance -= sharePrice;
     user.save();
+    req.session.user = user;
+    res.status(200).send('you have bought a new share !!');
   });
-  res.status(200).send('you have bought a new share !!');
 };
 
 module.exports.topUp = (id, amount, res, req, callback) => {
