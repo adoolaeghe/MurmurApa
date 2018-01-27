@@ -111,7 +111,7 @@ app.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {
   })
 })
 
-
+module.exports = app;
 
 app.listen(8080)
 console.log('Running on port 8080')
