@@ -167,5 +167,5 @@ module.exports.buyShare = (id, res, req, callback) => {
 
 //BUY SHARE OF A MUR//
 module.exports.sellShare = (id, res, req, callback) => {
-
+  
 }

@@ -55,10 +55,9 @@ module.exports = function(passport) {
 
 	//USER STORE AN INSTANCE OF SHARE IT BOUGHT//
 	router.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
-		console.log(req.session.user.rumBalance)
 	  let shareId = req.session.share;
 		let sharePrice = req.session.sharePrice;
-	  User.storeShare(req.params.id, shareId, sharePrice, res, req, function(err, mur) {
+	  User.storeShare(req.params.id, shareId, sharePrice, res, req, function(err) {
 	    if(err) {
 	      throw err;
 	    }
@@ -68,7 +67,17 @@ module.exports = function(passport) {
 	//USER CAN STORE AN INSTANCE OF SHARE IT BOUGHT//
 	router.put('/user/topup',isAuthenticated, (req, res, next) => {
 		let amount = req.body.amount;
-	  User.topUp(req.session.passport.user, amount, res, req, function(err, mur) {
+	  User.topUp(req.session.passport.user, amount, res, req, function(err) {
+	    if(err) {
+	      throw err;
+	    }
+	  })
+	})
+
+	//USER CAN SELL A SHARE//
+	router.post('/user/:shareid/sellshare',isAuthenticated, (req, res, next) => {
+		let shareId = req.params.shareid;
+	  User.sellShare(req.session.passport.user, shareId, res, req, function(err, mur) {
 	    if(err) {
 	      throw err;
 	    }

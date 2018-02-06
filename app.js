@@ -53,11 +53,11 @@ var isAuthenticated = function (req, res, next) {
 
 /// MURS API
 app.get('/', function(req,res){
-  res.send('heelo')
+  res.send('Please refer to the API routes')
 });
 
 /// MURS API
-app.get('/mur/all',isAuthenticated, function(req,res){
+app.get('/mur/all', function(req,res){
   Mur.getAllMurs(function(err, murs){
     if(err) {
       throw err;
@@ -78,7 +78,7 @@ app.post('/mur',isAuthenticated,(req,res) => {
 });
 
 /// UPDATE NEW MUR
-app.put('/mur/:id',isAuthenticated,(req,res) => {
+app.post('/mur/:id',(req,res) => {
   Mur.updateMur(req.params.id, req.body, res, function(err, mur){
     if(err) {
       throw err;
@@ -87,7 +87,7 @@ app.put('/mur/:id',isAuthenticated,(req,res) => {
 });
 
 /// GET A MUR BY ID
-app.get('/mur/:id', isAuthenticated,(req,res) => {
+app.get('/mur/:id', (req,res) => {
   Mur.getMur(req.params.id, res, function(err, mur){
     if(err) {
       throw err;

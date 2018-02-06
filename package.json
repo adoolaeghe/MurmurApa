@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register test/test.js",
+    "test": "mocha --compilers js:babel-core/register test/",
     "start": "babel-node app.js --presets es2015"
   },
   "dependencies": {
