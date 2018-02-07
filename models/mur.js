@@ -58,60 +58,58 @@ let murSchema = mongoose.Schema({
   }
 })
 
+
 let Mur = module.exports = mongoose.model('Mur', murSchema);
 let Share = mongoose.model('Share', shareSchema);
 let Layer = mongoose.model('Layer', layerSchema);
 let User = mongoose.model('User', userSchema);
 
 //GET ALL THE MUR//
-module.exports.getAllMurs = (callback) => {
-  Mur.find(callback);
+module.exports.getMurs = async (ctx) => {
+  const murs = await Mur.find({})
+  if (!murs) {
+    throw new Error("There was an error retrieving your Murs.")
+  } else {
+    ctx.body = murs
+  }
 }
 
 //ADD A MUR//
-module.exports.addMur = (mur, callback) => {
+module.exports.addMur = async (mur, ctx) => {
   let murInstance = new Mur(mur);
   let trackSchema = murInstance.trackSchema;
   initializeTrackSchema(trackSchema, murInstance)
   for (var x = 0; x < murInstance.initialNbOfShare; x++) {
     addInitialSharetoLayer(trackSchema, murInstance, Share)
   }
-  murInstance.save(mur, callback)
+  await murInstance.save(mur)
+  ctx.body = murInstance
 }
 
 //UPDATE A MUR//
-module.exports.updateMur = (id, body, res, callback) => {
-  Mur.findById(id, body, function (err, mur) {
-    if(!mur) {
-      res.send("no mur with this id")
-    }
-    mur.songName = body.songName;
-    mur.save();
-    res.json(mur);
-  });
+module.exports.updateMur = async (id, body, ctx) => {
+  const mur = await Mur.findById(id, body)
+  mur.songName = body.songName;
+  mur.save();
+  ctx.body = mur;
 }
 
 //GET A SPECIFIC MUR//
-module.exports.getMur = (id, res, callback) => {
-  Mur.findById(id, function (err, mur) {
-    if(!mur) {
-      res.send("no mur with this id")
-    }
-    res.json(mur)
-  });
+module.exports.getMur = async (id, ctx) => {
+  const mur = await Mur.findById(id)
+  if(!mur) {
+    throw new Error("There was an error retrieving this mur.")
+  }
+  ctx.body = mur;
 }
 
 //DELETE A SPECIFIC MUR//
-module.exports.deleteMur = (id, res, callback) => {
-  Mur.findByIdAndRemove(id, function (err, mur) {
-    if(!mur) {
-      res.send("no mur with this id")
-    }
-    var response = {
-        message: "Todo successfully deleted",
-    };
-    res.status(200).send(response);
-  });
+module.exports.deleteMur = async (id, ctx) => {
+  const mur = await Mur.findByIdAndRemove(id)
+  if(!mur) {
+    throw new Error("There was an error finding this mur")
+  }
+  ctx.body = mur;
 }
 
 //BUY SHARE OF A MUR//
@@ -167,5 +165,5 @@ module.exports.buyShare = (id, res, req, callback) => {
 
 //BUY SHARE OF A MUR//
 module.exports.sellShare = (id, res, req, callback) => {
-  
+
 }

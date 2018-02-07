@@ -1,11 +1,15 @@
-import express from 'express';
-import bodyParser from 'body-parser';
+import Koa from "koa";
+import Router from "koa-router";
+import bodyParser from "koa-better-body";
+import c2k from "koa-connect";
+
 import mongoose from 'mongoose';
-import passport from 'passport';
-import expressSession from 'express-session'
+import passport from 'koa-passport';
+import koaSession from 'koa-session'
+
 var LocalStrategy = require('passport-local').Strategy;
 
-let app = express();
+const app = new Koa();
 
 import Mur from './models/mur'
 import User from './models/user'
@@ -13,36 +17,49 @@ import User from './models/user'
 // Passport set up
 passport.use(new LocalStrategy(User.authenticate()));
 
-// Using the flash middleware provided by connect-flash to store messages in session
-// and displaying in templates
-var flash = require('connect-flash');
-app.use(flash());
-
 // Initialize Passport
 var initPassport = require('./passport/init');
 initPassport(passport);
 
-app.use(bodyParser.json())
+app.use(bodyParser());
 
-//use sessions for tracking logins
-app.use(expressSession({
-  secret: 'work hard',
-  resave: true,
-  saveUninitialized: false
-}));
+// Sessions
+app.keys = ['secret']
+app.use(koaSession({}, app))
 
 // initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.initialize())
+app.use(passport.session())
+
+// error handling
+app.use(async (ctx, next) => {
+  try {
+    await next()
+  } catch (err) {
+    ctx.status = err.status || 500
+    ctx.body = err.message
+    ctx.app.emit('error', err, ctx)
+  }
+})
 
 // Connect to mongoose
-mongoose.connect('mongodb://localhost/MURMUR_TEST')
+mongoose.Promise = require('bluebird')
+mongoose
+.connect('mongodb://localhost/MURMUR_TEST')
+.then((response) => {
+    console.log('mongo connection created')
+})
+.catch((err) => {
+    console.log("Error connecting to Mongo")
+    console.log(err);
+})
+
 let db = mongoose.connection
 
 var path = require('path');
 var routes = require('./routes/user')(passport);
 
-app.use('/', routes);
+// const router = new Router();
 
 var isAuthenticated = function (req, res, next) {
 	if (req.isAuthenticated()){
@@ -50,68 +67,56 @@ var isAuthenticated = function (req, res, next) {
   }
   res.send('you are note authenticated !!')
 }
+const router = require('koa-simple-router')
+const convert = require('koa-convert')
+const koaRes = require('koa-res')
+const logger = require('koa-logger')
+
+app.use(convert(koaRes()))
+app.use(logger())
 
 /// MURS API
-app.get('/', function(req,res){
-  res.send('Please refer to the API routes')
-});
+app.use(router(_ => {
 
-/// MURS API
-app.get('/mur/all', function(req,res){
-  Mur.getAllMurs(function(err, murs){
-    if(err) {
-      throw err;
-    }
-    res.json(murs)
-  });
-});
+    _.get('/', async (ctx) => {
+      ctx.body = 'Please refer to the API routes'
+    }),
 
-/// MUR API
-app.post('/mur',isAuthenticated,(req,res) => {
-  let mur = req.body;
-  Mur.addMur(mur, function(err, mur) {
-    if(err) {
-      throw err;
-    }
-    res.json(mur);
-  })
-});
+    _.get('/mur/all', async (ctx) => {
+      return Mur.getMurs(ctx)
+    }),
 
-/// UPDATE NEW MUR
-app.post('/mur/:id',(req,res) => {
-  Mur.updateMur(req.params.id, req.body, res, function(err, mur){
-    if(err) {
-      throw err;
-    }
-  })
-});
+    _.post('/mur', async (ctx) => {
+      let mur = await ctx.request.fields;
+      return Mur.addMur(mur, ctx)
+    })
 
-/// GET A MUR BY ID
-app.get('/mur/:id', (req,res) => {
-  Mur.getMur(req.params.id, res, function(err, mur){
-    if(err) {
-      throw err;
-    }
-  })
-})
+    _.post('/mur/:id', async (ctx) => {
+      let murId = await ctx.params.id;
+      let updatedMur = await ctx.request.fields;
+      return Mur.updateMur(murId, updatedMur, ctx)
+    })
 
-app.delete('/mur/:id',isAuthenticated,(req,res) => {
-  Mur.deleteMur(req.params.id, res, function(err, mur){
-    if(err) {
-      throw err;
-    }
-  })
-})
+    _.get('/mur/:id', async (ctx) => {
+      let murId = await ctx.params.id;
+      return Mur.getMur(murId, ctx)
+    })
 
-app.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {
-  Mur.buyShare(req.params.id, res, req, function(err, mur) {
-    if(err) {
-      throw err;
-    }
-  })
-})
+    _.delete('/mur/:id', async (ctx) => {
+      let murId = await ctx.params.id;
+      return Mur.deleteMur(murId, ctx)
+    })
+}))
 
-module.exports = app;
+//
+// router.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {
+//   Mur.buyShare(req.params.id, res, req, function(err, mur) {
+//     if(err) {
+//       throw err;
+//     }
+//   })
+// })
+// app.use(router.routes()).use(router.allowedMethods());
 
 app.listen(8080)
 console.log('Running on port 8080')
