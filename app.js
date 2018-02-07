@@ -145,8 +145,9 @@ const route = require('koa-route')
 
 
 app.use(route.post('/custom', async (ctx, next) => {
-  return passport.authenticate('local', async (user, info, status) => {
-    console.log(user)
+  console.log(ctx.request.fields)
+  let user = await ctx.request.fields;
+  return passport.authenticate('signup', async (user, info, status) => {
     if (user === false) {
       ctx.status = 401
       ctx.body = { success: false }

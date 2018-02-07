@@ -1,5 +1,6 @@
 const passport = require('koa-passport')
-
+var login = require('./login')
+var signup = require('./signup')
 const User = require('../models/user.js')
 
 User.findOne({ username: 'test' }, function (err, testUser) {
@@ -23,4 +24,3 @@ passport.deserializeUser(function(id, done) {
 
 login(passport);
 signup(passport);
-))
