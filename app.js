@@ -14,9 +14,6 @@ const app = new Koa();
 import Mur from './models/mur'
 import User from './models/user'
 
-// Passport set up
-// passport.use(new LocalStrategy(User.authenticate()));
-
 
 
 app.use(bodyParser());
@@ -147,8 +144,9 @@ const fs    = require('fs')
 const route = require('koa-route')
 
 
-app.use(route.post('/custom', function(ctx, next) {
-  return passport.authenticate('local', function(user, info, status) {
+app.use(route.post('/custom', async (ctx, next) => {
+  return passport.authenticate('local', async (user, info, status) => {
+    console.log(user)
     if (user === false) {
       ctx.status = 401
       ctx.body = { success: false }
