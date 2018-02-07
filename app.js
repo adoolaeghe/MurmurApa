@@ -15,11 +15,9 @@ import Mur from './models/mur'
 import User from './models/user'
 
 // Passport set up
-passport.use(new LocalStrategy(User.authenticate()));
+// passport.use(new LocalStrategy(User.authenticate()));
 
-// Initialize Passport
-var initPassport = require('./passport/init');
-initPassport(passport);
+
 
 app.use(bodyParser());
 
@@ -57,9 +55,8 @@ mongoose
 let db = mongoose.connection
 
 var path = require('path');
-var routes = require('./routes/user')(passport);
+// var routes = require('./routes/user')(passport);
 
-// const router = new Router();
 
 var isAuthenticated = function (req, res, next) {
 	if (req.isAuthenticated()){
@@ -67,6 +64,7 @@ var isAuthenticated = function (req, res, next) {
   }
   res.send('you are note authenticated !!')
 }
+
 const router = require('koa-simple-router')
 const convert = require('koa-convert')
 const koaRes = require('koa-res')
@@ -106,7 +104,121 @@ app.use(router(_ => {
       let murId = await ctx.params.id;
       return Mur.deleteMur(murId, ctx)
     })
+
+    _.put('/mur/:id/buyshare', async (ctx) => {
+      let murId = await ctx.params.id;
+      return Mur.buyShare(murId, ctx)
+    })
 }))
+
+app.use(router(_ => {
+    _.post('/signup', passport.authenticate('signup', {
+      successRedirect: '/successjson',
+      failureRedirect: '/failurejson',
+      failureFlash : true
+    }))
+}))
+
+
+const CSRF = require('koa-csrf')
+
+// trust proxy
+app.proxy = true
+
+// sessions
+const session = require('koa-generic-session')
+const MongoStore = require('koa-generic-session-mongo')
+
+app.keys = ['your-session-secret', 'another-session-secret']
+app.use(convert(session({
+  store: new MongoStore()
+})))
+
+
+
+// authentication
+require('./passport/init')
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+// routes
+const fs    = require('fs')
+const route = require('koa-route')
+
+
+app.use(route.post('/custom', function(ctx, next) {
+  return passport.authenticate('local', function(user, info, status) {
+    if (user === false) {
+      ctx.status = 401
+      ctx.body = { success: false }
+    } else {
+      ctx.body = { success: true }
+      return ctx.login(user)
+    }
+  })(ctx, next)
+}))
+
+// POST /login
+app.use(route.post('/login',
+  passport.authenticate('local', {
+    successRedirect: '/app',
+    failureRedirect: '/'
+  })
+))
+
+app.use(route.get('/logout', function(ctx) {
+  ctx.logout()
+  ctx.redirect('/')
+}))
+
+app.use(route.get('/auth/facebook',
+  passport.authenticate('facebook')
+))
+
+app.use(route.get('/auth/facebook/callback',
+  passport.authenticate('facebook', {
+    successRedirect: '/app',
+    failureRedirect: '/'
+  })
+))
+
+app.use(route.get('/auth/twitter',
+  passport.authenticate('twitter')
+))
+
+app.use(route.get('/auth/twitter/callback',
+  passport.authenticate('twitter', {
+    successRedirect: '/app',
+    failureRedirect: '/'
+  })
+))
+
+app.use(route.get('/auth/google',
+  passport.authenticate('google')
+))
+
+app.use(route.get('/auth/google/callback',
+  passport.authenticate('google', {
+    successRedirect: '/app',
+    failureRedirect: '/'
+  })
+))
+
+// Require authentication for now
+app.use(function(ctx, next) {
+  if (ctx.isAuthenticated()) {
+    return next()
+  } else {
+    ctx.redirect('/')
+  }
+})
+
+app.use(route.get('/app', function(ctx) {
+  ctx.type = 'html'
+  ctx.body = fs.createReadStream('views/app.html')
+}))
+
 
 //
 // router.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {

@@ -7,7 +7,7 @@ module.exports = function(passport, err){
 	passport.use('signup', new LocalStrategy({
             passReqToCallback : true // allows us to pass back the entire request to the callback
         },
-        function(req, username, password, done) {
+        function(ctx, username, password, done) {
             var findOrCreateUser = function(err){
                 // find a user in Mongo with provided username
                 User.findOne({ 'userName' :  username }, function(err, user) {
@@ -17,7 +17,7 @@ module.exports = function(passport, err){
                     }
                     if (user) {
                         console.log('User already exists with username: '+username);
-                        return done(null, false, req.flash('message','User Already Exists'));
+                        return done(null, false, ctx.flash('message','User Already Exists'));
                     } else {
                         var newUser = new User();
                         // set the user's local credentials

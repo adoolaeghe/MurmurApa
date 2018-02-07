@@ -107,60 +107,60 @@ module.exports.getMur = async (id, ctx) => {
 module.exports.deleteMur = async (id, ctx) => {
   const mur = await Mur.findByIdAndRemove(id)
   if(!mur) {
-    throw new Error("There was an error finding this mur")
+    throw new Error("There was an error finding this mur");
   }
+  ctx.status
   ctx.body = mur;
 }
 
 //BUY SHARE OF A MUR//
-module.exports.buyShare = (id, res, req, callback) => {
-  let sessionUser = req.session.user;
-  const sessionUserId = req.session.passport.user;
+module.exports.buyShare = async (id, ctx) => {
+  let sessionUser = ctx.session.user;
+  const sessionUserId = ctx.session.passport.user;
 
-  Mur.findById(id, function(err, mur) {
-    if(!mur) {
-      res.send("no mur with this id");
-    }
+  const mur = await Mur.findById(id)
+  if(!mur) {
+    throw new Error("There was an error finding this mur");
+  }
 
-    /// EXTRACT THIS INTO A CLASSSS
+  /// EXTRACT THIS INTO A CLASSSS
 
-    let trackSchema = mur.trackSchema;
-    let trackLayers = trackSchema.layers;
-    let lastTrackLayers = trackLayers[(trackLayers.length)-1];
-    let lastTrackLayerSharesNb = lastTrackLayers.shares.length;
-    let shareId = "";
-    let sharePrice = null
-    let newTrackLayers = {};
+  let trackSchema = mur.trackSchema;
+  let trackLayers = trackSchema.layers;
+  let lastTrackLayers = trackLayers[(trackLayers.length)-1];
+  let lastTrackLayerSharesNb = lastTrackLayers.shares.length;
+  let shareId = "";
+  let sharePrice = null
+  let newTrackLayers = {};
 
-    for (var i = 0; i < lastTrackLayerSharesNb; i++) {
-      if(!lastTrackLayers.shares[i].owned) {
-        if(sessionUser.rumBalance < lastTrackLayers.shares[i].price) {
-          res.send("unsufficient Rum Balance ");
-          return
-        }
-        switchShareProperty(lastTrackLayers, i, sessionUserId);
-        shareId = lastTrackLayers.shares[i]._id;
-        sharePrice = lastTrackLayers.shares[i].price;
-        if(lastTrackLayers.sharesAvailable === 0) {
-          createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
-          newTrackLayers = trackLayers[(trackLayers.length)-1];
-          newTrackLayers.sharesAvailable = (trackLayers[(trackLayers.length)-2].shares.length) * trackSchema.shareIncrementor;
-          for (var x = 0; x < newTrackLayers.sharesAvailable; x++) {
-            addSharetoLayer(trackLayers, newTrackLayers, trackSchema, Share);
-          }
-        }
-        break;
+  for (var i = 0; i < lastTrackLayerSharesNb; i++) {
+    if(!lastTrackLayers.shares[i].owned) {
+      if(sessionUser.rumBalance < lastTrackLayers.shares[i].price) {
+        ctx.body = "unsufficient Rum Balance ";
+        return
       }
+      switchShareProperty(lastTrackLayers, i, sessionUserId);
+      shareId = lastTrackLayers.shares[i]._id;
+      sharePrice = lastTrackLayers.shares[i].price;
+      if(lastTrackLayers.sharesAvailable === 0) {
+        createNewLayer(trackLayers, newTrackLayers, trackSchema, Layer);
+        newTrackLayers = trackLayers[(trackLayers.length)-1];
+        newTrackLayers.sharesAvailable = (trackLayers[(trackLayers.length)-2].shares.length) * trackSchema.shareIncrementor;
+        for (var x = 0; x < newTrackLayers.sharesAvailable; x++) {
+          addSharetoLayer(trackLayers, newTrackLayers, trackSchema, Share);
+        }
+      }
+      break;
     }
-    mur.save();
-    req.session.share = shareId;
-    req.session.sharePrice = sharePrice;
-    var response = {
-        message: "You successfully bought a new share !",
-        share: lastTrackLayerSharesNb
-    };
-    res.redirect('/user/' + sessionUserId + '/storeShare');
-  });
+  }
+  mur.save();
+  ctx.session.share = shareId;
+  ctx.session.sharePrice = sharePrice;
+  var response = {
+      message: "You successfully bought a new share !",
+      share: lastTrackLayerSharesNb
+  };
+  ctx.redirect('/user/' + sessionUserId + '/storeShare');
 }
 
 //BUY SHARE OF A MUR//
