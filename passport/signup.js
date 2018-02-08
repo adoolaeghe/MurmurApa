@@ -8,6 +8,7 @@ module.exports = function(passport, err){
             passReqToCallback : true // allows us to pass back the entire request to the callback
         },
         function(ctx, username, password, done) {
+					console.log('here')
             var findOrCreateUser = function(err){
                 // find a user in Mongo with provided username
                 User.findOne({ 'userName' :  username }, function(err, user) {
@@ -33,7 +34,6 @@ module.exports = function(passport, err){
                                 console.log('Error in Saving user: '+err);
                                 throw err;
                             }
-                            console.log('User Registration succesful');
                             req.session.user = newUser
                             return done(null, newUser);
                         });

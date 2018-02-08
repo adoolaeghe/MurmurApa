@@ -1,26 +1,60 @@
 const passport = require('koa-passport')
-var login = require('./login')
-var signup = require('./signup')
-const User = require('../models/user.js')
 
-User.findOne({ username: 'test' }, function (err, testUser) {
-  if (!testUser) {
-    console.log('test user did not exist; creating test user...')
-    testUser = new User({
-      username: 'test',
-      password: 'test'
-    })
-    testUser.save()
+const fetchUser = (() => {
+  // This is an example! Use password hashing in your project and avoid storing passwords in your code
+  const user = { id: 1, username: 'test', password: 'test' }
+  return async function() {
+    return user
+  }
+})()
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id)
+})
+
+passport.deserializeUser(async function(id, done) {
+  try {
+    const user = await fetchUser()
+    done(null, user)
+  } catch(err) {
+    done(err)
   }
 })
 
-passport.serializeUser(function(user, done) {
-  done(null, user._id)
-})
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, done);
-})
 
-login(passport);
-signup(passport);
+const FacebookStrategy = require('passport-facebook').Strategy
+passport.use(new FacebookStrategy({
+    clientID: 'your-client-id',
+    clientSecret: 'your-secret',
+    callbackURL: 'http://localhost:' + (process.env.PORT || 3000) + '/auth/facebook/callback'
+  },
+  function(token, tokenSecret, profile, done) {
+    // retrieve user ...
+    fetchUser().then(user => done(null, user))
+  }
+))
+
+const TwitterStrategy = require('passport-twitter').Strategy
+passport.use(new TwitterStrategy({
+    consumerKey: 'your-consumer-key',
+    consumerSecret: 'your-secret',
+    callbackURL: 'http://localhost:' + (process.env.PORT || 3000) + '/auth/twitter/callback'
+  },
+  function(token, tokenSecret, profile, done) {
+    // retrieve user ...
+    fetchUser().then(user => done(null, user))
+  }
+))
+
+const GoogleStrategy = require('passport-google-auth').Strategy
+passport.use(new GoogleStrategy({
+    clientId: 'your-client-id',
+    clientSecret: 'your-secret',
+    callbackURL: 'http://localhost:' + (process.env.PORT || 3000) + '/auth/google/callback'
+  },
+  function(token, tokenSecret, profile, done) {
+    // retrieve user ...
+    fetchUser().then(user => done(null, user))
+  }
+))
