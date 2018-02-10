@@ -15,6 +15,10 @@ let shareSchema = mongoose.Schema({
   owner: {
     type: String,
     required: false
+  },
+  timeStamp: {
+    type: Date,
+    required: false
   }
 })
 

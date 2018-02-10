@@ -2,6 +2,9 @@ var LocalStrategy   = require('passport-local').Strategy;
 var User = require('../models/user');
 var bCrypt = require('bcrypt-nodejs');
 
+var isValidPassword = function(password, user){
+	return bCrypt.compareSync(user, password);
+}
 
 module.exports = function(passport){
 	passport.use('login', new LocalStrategy({
@@ -14,12 +17,10 @@ module.exports = function(passport){
               return done(err);
             }
             if (!user){
-              console.log('User Not Found with username '+ username);
               return done(null, false, req.flash('message', 'User Not found.'));
             }
-            if (!isValidPassword(user, password)){
-              console.log('Invalid Password');
-              return done(null, false, req.flash('message', 'Invalid Password')); // redirect back to login page
+            if (!isValidPassword(user.password, password)){
+              return done(null, false, req.flash('message', 'Invalid Password'));
             }
             req.session.user = user
             return done(null, user);
@@ -27,10 +28,4 @@ module.exports = function(passport){
         );
       })
     );
-
-
-    var isValidPassword = function(user, password){
-      return bCrypt.compareSync(password, user.password);
-    }
-
 }

@@ -86,11 +86,9 @@ module.exports.sellShare = (userId, shareId, res, req, callback) => {
     share.owned = "sold";
     share.save();
     User.findById(userId, function(err, user) {
-      console.log(user.rumBalance);
-      console.log(share.price);
       user.rumBalance -= share.price;
       user.save();
-      console.log(user.rumBalance);
+
     })
   });
   /// SHARE STATUS TO SOLD

@@ -13,15 +13,15 @@ module.exports = function(passport) {
 
 	// HANDLE LOGIN POST //
 	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/successjson',
-		failureRedirect: '/failurejson',
+		successRedirect: '/user/successjson',
+		failureRedirect: '/user/failurejson',
 		failureFlash : true
 	}));
 
 	// HANFLE REGISTRATION POST //
 	router.post('/signup', passport.authenticate('signup', {
-		successRedirect: '/successjson',
-		failureRedirect: '/failurejson',
+		successRedirect: '/user/successjson',
+		failureRedirect: '/user/failurejson',
 		failureFlash : true
 	}));
 
@@ -35,7 +35,7 @@ module.exports = function(passport) {
 	});
 
 	//GET A SPECIFIC USER//
-	router.get('/user/:id',isAuthenticated, (req, res) => {
+	router.get('/:id',isAuthenticated, (req, res) => {
 	  User.getUser(req.params.id, res, function(err, user) {
 	    if(err) {
 	      throw err;
@@ -44,7 +44,7 @@ module.exports = function(passport) {
 	})
 
 	//GET A SPECIFIC USER//
-	router.get('/users', isAuthenticated, (req, res) => {
+	router.get('/users',  (req, res) => {
 		User.getAllUsers(function(err, users){
 	    if(err) {
 	      throw err;
@@ -54,7 +54,7 @@ module.exports = function(passport) {
 	})
 
 	//USER STORE AN INSTANCE OF SHARE IT BOUGHT//
-	router.put('/user/:id/storeShare',isAuthenticated, (req, res, next) => {
+	router.put('/:id/storeShare', (req, res, next) => {
 	  let shareId = req.session.share;
 		let sharePrice = req.session.sharePrice;
 	  User.storeShare(req.params.id, shareId, sharePrice, res, req, function(err) {
@@ -65,7 +65,7 @@ module.exports = function(passport) {
 	})
 
 	//USER CAN STORE AN INSTANCE OF SHARE IT BOUGHT//
-	router.put('/user/topup',isAuthenticated, (req, res, next) => {
+	router.put('/topup', (req, res, next) => {
 		let amount = req.body.amount;
 	  User.topUp(req.session.passport.user, amount, res, req, function(err) {
 	    if(err) {
@@ -75,7 +75,7 @@ module.exports = function(passport) {
 	})
 
 	//USER CAN SELL A SHARE//
-	router.post('/user/:shareid/sellshare',isAuthenticated, (req, res, next) => {
+	router.post('/:shareid/sellshare', (req, res, next) => {
 		let shareId = req.params.shareid;
 	  User.sellShare(req.session.passport.user, shareId, res, req, function(err, mur) {
 	    if(err) {

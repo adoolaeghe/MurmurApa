@@ -6,19 +6,11 @@ let trackSchema = mongoose.Schema({
   id: {
     type: Number,
   },
-  priceIncrementor: {
+  totalNbShares: {
     type: Number,
     required: false
   },
-  shareIncrementor: {
-    type: Number,
-    required: false
-  },
-  initialSharePrice: {
-    type: Number,
-    required: false
-  },
-  crtNbShares: {
+  maxNbShares: {
     type: Number,
     required: false
   },
@@ -26,11 +18,19 @@ let trackSchema = mongoose.Schema({
     type: Number,
     required: false
   },
-  crtRiskPrice: {
+  crtShareValue: {
+    type: Number,
+    default: 0
+  },
+  totalValue: {
     type: Number,
     required: false
   },
-  avgPrice: {
+  totalNbBoughtShare: {
+    type: Number,
+    required: false
+  },
+  crtRiskPrice: {
     type: Number,
     required: false
   },

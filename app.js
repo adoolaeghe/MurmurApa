@@ -4,8 +4,23 @@ import mongoose from 'mongoose';
 import passport from 'passport';
 import expressSession from 'express-session'
 var LocalStrategy = require('passport-local').Strategy;
+var RateLimit = require('express-rate-limit');
+
 
 let app = express();
+app.enable('trust proxy');
+
+var limiter = new RateLimit({
+  windowMs: 15*60*1000,
+  max: 200,
+  delayMs: 0
+});
+
+app.use(limiter);
+
+var morgan = require('morgan')
+
+app.use(morgan("common"));
 
 import Mur from './models/mur'
 import User from './models/user'
@@ -14,7 +29,6 @@ import User from './models/user'
 passport.use(new LocalStrategy(User.authenticate()));
 
 // Using the flash middleware provided by connect-flash to store messages in session
-// and displaying in templates
 var flash = require('connect-flash');
 app.use(flash());
 
@@ -40,9 +54,11 @@ mongoose.connect('mongodb://localhost/MURMUR_TEST')
 let db = mongoose.connection
 
 var path = require('path');
-var routes = require('./routes/user')(passport);
+var userRoute = require('./routes/user')(passport);
+var murRoute = require('./routes/mur')();
 
-app.use('/', routes);
+app.use('/user', userRoute);
+app.use('/mur', murRoute);
 
 var isAuthenticated = function (req, res, next) {
 	if (req.isAuthenticated()){
@@ -56,62 +72,8 @@ app.get('/', function(req,res){
   res.send('Please refer to the API routes')
 });
 
-/// MURS API
-app.get('/mur/all', function(req,res){
-  Mur.getAllMurs(function(err, murs){
-    if(err) {
-      throw err;
-    }
-    res.json(murs)
-  });
-});
-
-/// MUR API
-app.post('/mur',isAuthenticated,(req,res) => {
-  let mur = req.body;
-  Mur.addMur(mur, function(err, mur) {
-    if(err) {
-      throw err;
-    }
-    res.json(mur);
-  })
-});
-
-/// UPDATE NEW MUR
-app.post('/mur/:id',(req,res) => {
-  Mur.updateMur(req.params.id, req.body, res, function(err, mur){
-    if(err) {
-      throw err;
-    }
-  })
-});
-
-/// GET A MUR BY ID
-app.get('/mur/:id', (req,res) => {
-  Mur.getMur(req.params.id, res, function(err, mur){
-    if(err) {
-      throw err;
-    }
-  })
-})
-
-app.delete('/mur/:id',isAuthenticated,(req,res) => {
-  Mur.deleteMur(req.params.id, res, function(err, mur){
-    if(err) {
-      throw err;
-    }
-  })
-})
-
-app.put('/mur/:id/buyshare',isAuthenticated, (req, res, next) => {
-  Mur.buyShare(req.params.id, res, req, function(err, mur) {
-    if(err) {
-      throw err;
-    }
-  })
-})
-
 module.exports = app;
 
-app.listen(8080)
-console.log('Running on port 8080')
+app.listen(8080, () => {
+  console.log('LISTENING ON PORT');
+});
